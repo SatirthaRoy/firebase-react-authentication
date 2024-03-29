@@ -1,34 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, GithubAuthProvider  } from "firebase/auth";
+import app from "./firebase/firebase.init";
+import { useState } from "react";
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+
+  const auth = getAuth(app);
+  console.log(auth);
+  const googleProvider = new GoogleAuthProvider();
+  const gitProvider = new GithubAuthProvider();
+
+  const handleGoogleSignIn = () => {
+    console.log('magi');
+    signInWithPopup(auth, googleProvider)
+    .then(result => {
+      const loggedInuser = result.user;
+      console.log(loggedInuser);
+      setUser(loggedInuser);
+    })
+    .catch(error => {
+      console.log('error: ', error.message);
+    })
+  }
+
+  const handleGit = () => {
+    console.log('git magi');
+    signInWithPopup(auth, gitProvider)
+    .then(result => {
+      const loggedInuser = result.user;
+      console.log(loggedInuser);
+      setUser(loggedInuser);
+    })
+    .catch(error => {
+      console.log('error: ', error.message);
+    })
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="flex flex-col items-center gap-7">
+      <h1 className="text-4xl text-center font-semibold">LOG IN HERE</h1>
+      {user ? <button onClick={()=> {
+          signOut(auth).then(()=> {
+            console.log('logged out');
+            setUser(null);
+          })
+          .catch(e => {
+            console.log('error: ', e);
+          })
+        }} className="p-4 text-white font-semibold rounded-xl bg-blue-400">Log Out</button>
+         :
+         <>
+            <button onClick={handleGoogleSignIn} className="p-4 text-white font-semibold rounded-xl bg-blue-400">Google login</button>
+            <button onClick={handleGit} className="p-4 text-white font-semibold rounded-xl bg-gray-400">Github login</button>
+         </> 
+         
+         
+         }
+      
+     {user && 
+     <>
+        <h1>user: {user?.displayName}</h1> 
+        <h1>Email: {user?.email}</h1>
+        <img src={user.photoURL} alt="" />
+        
+     </>
+     }
+
+
+    </div>
   )
 }
 
